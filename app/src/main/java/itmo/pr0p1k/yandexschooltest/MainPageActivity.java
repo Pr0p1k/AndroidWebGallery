@@ -6,6 +6,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,13 +24,18 @@ public class MainPageActivity extends AppCompatActivity {
     private final String TAG = "MainPageActivity";
     private List<PhotoItem> itemsList = new ArrayList<>();
     private int amountOfRows;
+    private String token;
+    private final String YandexAPIURL = "https://cloud-api.yandex.net/v1/disk/resources/files";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_page);
         photoContent = findViewById(R.id.photo_list);
-        amountOfRows = 4;
+        amountOfRows = 3;
+        token = getIntent().toUri(Intent.URI_ALLOW_UNSAFE);
+        token = token.substring(token.indexOf("access_token="));
+        token = token.substring(token.indexOf("=") + 1, token.indexOf("&"));
         photoContent.setLayoutManager(new GridLayoutManager(this, amountOfRows));
         new GetItemTask().execute();
         setAdapter();
@@ -70,8 +76,8 @@ public class MainPageActivity extends AppCompatActivity {
         @Override
         public void onBindViewHolder(PhotoItemHolder holder, int position) {
             PhotoItem item = collection.get(position);
-            Picasso.with(MainPageActivity.this).load(item.getShortcutURL()).into(holder.itemImageView);
-
+//            Picasso.with(MainPageActivity.this).load(/*new PhotoGetter(token, YandexAPIURL).getPhoto(*/item.getShortcutURL()).into(holder.itemImageView);
+            holder.itemImageView.setImageDrawable(item.getImage());
         }
 
         @Override
@@ -91,7 +97,7 @@ public class MainPageActivity extends AppCompatActivity {
     private class GetItemTask extends AsyncTask<Void, Void, List<PhotoItem>> {
         @Override
         protected List<PhotoItem> doInBackground(Void... voids) {
-            return new PhotoGetter().getItems();
+            return new PhotoGetter(token, YandexAPIURL).getPhotos();
         }
 
         @Override
@@ -100,5 +106,4 @@ public class MainPageActivity extends AppCompatActivity {
             setAdapter();
         }
     }
-
 }

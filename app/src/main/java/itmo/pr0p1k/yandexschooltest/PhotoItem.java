@@ -1,10 +1,21 @@
 package itmo.pr0p1k.yandexschooltest;
 
+import android.graphics.drawable.Drawable;
+
 public class PhotoItem {
     private String ID;
     private String ShortcutURL;
     private String title;
     private String FullURL;
+    private Drawable image;
+
+    public Drawable getImage() {
+        return image;
+    }
+
+    public void setImage(Drawable image) {
+        this.image = image;
+    }
 
     public String getID() {
         return ID;
