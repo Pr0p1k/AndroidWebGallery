@@ -1,34 +1,8 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<ImageView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/photo_full"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="#000000"
-    tools:context="itmo.pr0p1k.yandexschooltest.FullPhotoActivity">
+    android:layout_height="wrap_content"
+    android:layout_gravity="center"
+    android:adjustViewBounds="true"
+    android:visibility="visible" />
 
-    <!-- The primary full-screen view. This can be replaced with whatever view
-         is needed to present your content, e.g. VideoView, SurfaceView,
-         TextureView, etc. -->
-    <android.gesture.GestureOverlayView
-        android:id="@+id/gesture"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
-
-    </android.gesture.GestureOverlayView>
-    <TextView
-        android:id="@+id/fullscreen_content"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:gravity="center"
-        android:keepScreenOn="true"
-        android:textColor="#33b5e5"
-        android:textSize="50sp"
-        android:textStyle="bold" />
-
-    <ImageView
-        android:id="@+id/photo_full"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
-    <!-- This FrameLayout insets its children based on system windows using
-         android:fitsSystemWindows. -->
-
-</FrameLayout>

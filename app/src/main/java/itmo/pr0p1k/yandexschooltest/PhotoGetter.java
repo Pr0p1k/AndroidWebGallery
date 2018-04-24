@@ -27,6 +27,7 @@ public class PhotoGetter {
     private static final String TAG = "PhotoGetter";
     private String token;
     private String YandexAPIURL;
+    private String downloadURL = "https://cloud-api.yandex.net/v1/disk/resources/download";
 
     PhotoGetter(String token, String YandexAPIURL) {
         this.token = token;
@@ -35,28 +36,37 @@ public class PhotoGetter {
 
     private String getJSON(String URL) throws IOException {
         OkHttpClient okHttpClient = new OkHttpClient();
-        Request request = new Request.Builder().url(URL).addHeader("authorization", token).build();
+        Request request = new Request.Builder().url(URL).addHeader("authorization", "OAuth " + token).build();
         Response response = okHttpClient.newCall(request).execute();
         return response.body().string();
     }
 
-    private InputStream download(String URL) throws IOException {
-        OkHttpClient okHttpClient = new OkHttpClient();
-        Request request = new Request.Builder().url(URL).build();
-        Response response = okHttpClient.newCall(request).execute();
-        return response.body().byteStream();
+    private Drawable download(String URL) throws IOException { //Этот метод сразу скачивает фото. Использую для загрузки превью
+        try {
+            Log.i(TAG, URL);
+            OkHttpClient okHttpClient = new OkHttpClient();
+            Request request = new Request.Builder().url(URL).addHeader("authorization", "OAuth " + token).build();
+            Response response = okHttpClient.newCall(request).execute();
+            return Drawable.createFromStream(new ByteArrayInputStream(response.body().bytes()), "photo");
+        } catch (Exception ex) {
+            Log.e(TAG, "Exception occurred while downloading a photo", ex);
+        }
+        return null;
     }
 
-    public Drawable getPhoto(String URL) throws IOException, JSONException {
-        OkHttpClient okHttpClient = new OkHttpClient();
-        String DownloadURL = Uri.parse("https://cloud-api.yandex.net/v1/disk/resources/download").buildUpon()
-                .appendQueryParameter("path", URL).build().toString();
-        Request request = new Request.Builder().url(DownloadURL).addHeader("authorization", token).build();
-        Response response = okHttpClient.newCall(request).execute();
-        JSONObject JSON = new JSONObject(response.body().string());
-        Log.i(TAG, JSON.getString("href"));
+    public String getDownloadLink(String URL) {
+        try {
+            Log.i(TAG, URL);
+            OkHttpClient okHttpClient = new OkHttpClient();
+            Request request = new Request.Builder().url(URL).addHeader("authorization", "OAuth " + token).build();
+            Response response = okHttpClient.newCall(request).execute();
+            JSONObject JSON = new JSONObject(response.body().string());
+            return JSON.getString("href");
+        } catch (Exception ex) {
+            Log.e(TAG, "Exception occurred while getting a download link", ex);
+        }
+        return null;
 
-        return Drawable.createFromStream(download(JSON.getString("href")), "Received picture");
     }
 
     public List<PhotoItem> getPhotos() {
@@ -64,6 +74,7 @@ public class PhotoGetter {
         String request = Uri.parse(YandexAPIURL).buildUpon()
                 .appendQueryParameter("limit", "40")
                 .appendQueryParameter("media_type", "image")
+                .appendQueryParameter("preview_size", "M")
                 .build().toString();
         try {
             String JSONString = getJSON(request);
@@ -84,51 +95,13 @@ public class PhotoGetter {
             if (!JSONItems.getJSONObject(i).has("preview")) continue;
             PhotoItem pi = new PhotoItem();
             pi.setTitle(JSONItems.getJSONObject(i).getString("name"));
-            pi.setShortcutURL(JSONItems.getJSONObject(i).getString("preview"));
-            pi.setFullURL(JSONItems.getJSONObject(i).getString("path"));
-            pi.setImage(getPhoto(pi.getFullURL()));
+            pi.setImage(download(JSONItems.getJSONObject(i).getString("preview")));
+            pi.setFullURL(getDownloadLink(Uri.parse(downloadURL)
+                    .buildUpon()
+                    .appendQueryParameter("path", JSONItems.getJSONObject(i).getString("path"))
+                    .build().toString()));
             list.add(pi);
         }
         return list;
     }
-
-//    public List<PhotoItem> getItems() {
-//        List<PhotoItem> itemsList = new ArrayList<>();
-//        String URL = Uri.parse(APIServerURL).buildUpon()
-//                .appendQueryParameter("method", "flickr.photos.getRecent")
-//                .appendQueryParameter("api_key", TOKEN)
-//                .appendQueryParameter("format", "json")
-//                .appendQueryParameter("nojsoncallback", "1")
-//                .appendQueryParameter("extras", "url_s")
-//                .build().toString();
-//        try {
-//            String JSONString = getJSON(URL);
-//            JSONObject JSONBody = new JSONObject(JSONString);
-//            itemsList = parse(JSONBody);
-//        } catch (IOException IOEx) {
-//            Log.e(TAG, "IOEXCEPTION БЛЯТЬ!", IOEx);
-//        } catch (JSONException JSONEx) {
-//            Log.e(TAG, "JSONEXCEPTION БЛЯТЬ!", JSONEx);
-//        }
-//        return itemsList;
-//    }
-//
-//    private List<PhotoItem> parse(JSONObject body) throws IOException, JSONException {
-//        JSONObject photos = body.getJSONObject("photos");
-//        JSONArray photo = photos.getJSONArray("photo");
-//        List<PhotoItem> list = new ArrayList<>();
-//        for (int i = 0; i < photo.length(); i++) {
-//            PhotoItem pi = new PhotoItem();
-//            pi.setID(photo.getJSONObject(i).getString("id"));
-//            pi.setTitle(photo.getJSONObject(i).getString("title"));
-//
-//            if (!photo.getJSONObject(i).has("url_s")) {
-//                continue;
-//            }
-//            pi.setShortcutURL(photo.getJSONObject(i).getString("url_s"));
-//            pi.setFullURL(photo.getJSONObject(i).getString("url_s").substring(0, photo.getJSONObject(i).getString("url_s").length() - 5) + "c.jpg");
-//            list.add(pi);
-//        }
-//        return list;
-//    }
 }
