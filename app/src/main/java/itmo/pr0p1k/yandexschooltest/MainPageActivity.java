@@ -10,6 +10,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -34,12 +35,14 @@ public class MainPageActivity extends AppCompatActivity {
     private String token;
     private final String YandexAPIURL = "https://cloud-api.yandex.net/v1/disk/resources/files";
     private PhotoGetter photoGetter;
-    // private PhotoItem currentPhoto;
+    private Toolbar toolbar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_page);
+        toolbar = findViewById(R.id.toolbar_photo_view);
+        setSupportActionBar(toolbar);
         photoContent = findViewById(R.id.photo_list);
         amountOfRows = 3;
         token = getIntent().toUri(Intent.URI_ALLOW_UNSAFE);
@@ -84,7 +87,7 @@ public class MainPageActivity extends AppCompatActivity {
 
         @Override
         public void onBindViewHolder(final PhotoItemHolder holder, int position) {
-            holder.itemImageView.setImageDrawable(collection.get(position).getImage());
+            holder.itemImageView.setImageDrawable(collection.get(position).getImage()); //todo download from here
         }
 
         @Override

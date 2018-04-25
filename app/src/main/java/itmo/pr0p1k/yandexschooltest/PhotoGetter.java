@@ -2,6 +2,7 @@ package itmo.pr0p1k.yandexschooltest;
 
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.support.annotation.Nullable;
 import android.util.Log;
 
 import org.json.JSONArray;
@@ -41,13 +42,10 @@ public class PhotoGetter {
         return response.body().string();
     }
 
-    private Drawable download(String URL) throws IOException { //Этот метод сразу скачивает фото. Использую для загрузки превью
+    @Nullable
+    public Drawable download(String URL) throws IOException { //Этот метод сразу скачивает фото. Использую для загрузки превью
         try {
-            Log.i(TAG, URL);
-            OkHttpClient okHttpClient = new OkHttpClient();
-            Request request = new Request.Builder().url(URL).addHeader("authorization", "OAuth " + token).build();
-            Response response = okHttpClient.newCall(request).execute();
-            return Drawable.createFromStream(new ByteArrayInputStream(response.body().bytes()), "photo");
+            return Drawable.createFromStream(new ByteArrayInputStream(requestToServer(URL).getBytes()), "photo");
         } catch (Exception ex) {
             Log.e(TAG, "Exception occurred while downloading a photo", ex);
         }
@@ -56,17 +54,25 @@ public class PhotoGetter {
 
     public String getDownloadLink(String URL) {
         try {
-            Log.i(TAG, URL);
-            OkHttpClient okHttpClient = new OkHttpClient();
-            Request request = new Request.Builder().url(URL).addHeader("authorization", "OAuth " + token).build();
-            Response response = okHttpClient.newCall(request).execute();
-            JSONObject JSON = new JSONObject(response.body().string());
-            return JSON.getString("href");
+            return new JSONObject(requestToServer(URL)).getString("href");
         } catch (Exception ex) {
             Log.e(TAG, "Exception occurred while getting a download link", ex);
         }
         return null;
 
+    }
+
+    @Nullable
+    private String requestToServer(String URL) {
+        try {
+            OkHttpClient okHttpClient = new OkHttpClient();
+            Request request = new Request.Builder().url(URL).addHeader("authorization", "OAuth " + token).build();
+            Response response = okHttpClient.newCall(request).execute();
+            return response.body().string();
+        } catch (Exception ex) {
+            Log.e(TAG, "Exception occurred while requesting to server", ex);
+        }
+        return null;
     }
 
     public List<PhotoItem> getPhotos() {

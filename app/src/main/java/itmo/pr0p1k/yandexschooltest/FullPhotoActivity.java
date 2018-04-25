@@ -1,21 +1,15 @@
 package itmo.pr0p1k.yandexschooltest;
 
-import android.annotation.SuppressLint;
-import android.gesture.GestureOverlayView;
-import android.graphics.drawable.Drawable;
-import android.media.Image;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.os.Handler;
-import android.view.MotionEvent;
-import android.view.View;
 import android.widget.ImageView;
+import android.widget.Toolbar;
 
 import com.squareup.picasso.Picasso;
 
 public class FullPhotoActivity extends AppCompatActivity {
-    ImageView image;
+    private ImageView image;
+    private Toolbar toolbar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
